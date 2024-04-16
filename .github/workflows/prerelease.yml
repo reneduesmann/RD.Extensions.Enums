@@ -19,4 +19,4 @@ jobs:
         path: ./nupkg
 
     - name: Publish Nuget Package
-      run: dotnet nuget push ./nupkg/*-prerelase.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+      run: dotnet nuget push ./nupkg/*-prerelease.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
