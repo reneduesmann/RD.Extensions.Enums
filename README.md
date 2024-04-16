@@ -29,6 +29,7 @@ enumCache.GetLongValue(MyEnum.MyValue); // returns 1
 enumCache.GetDoubleValue(MyEnum.MyValue); // returns 5.5
 enumCache.GetBooleanValue(MyEnum.MyValue); // returns true
 enumCache.GetKeyValuePairs(MyEnum.MyValue); // returns a List<KeyValuePair<string, object>>
+enumCache.GetEnumValueByAttributeValue<MyEnum, string>("Value1"); // returns MyEnum.MyValue
 ```
 
 ### Caching Mechanism
