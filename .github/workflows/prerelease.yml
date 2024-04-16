@@ -1,36 +1,22 @@
-name: Prerelease
+name: Nuget Prerelease
 
 on:
-  push:
-    branches: [ main ]
+  workflow_run:
+      workflows: ["CI"]
+      types:
+        - completed
 
 jobs:
-  build:
-
+  publish_package:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
-    - uses: actions/checkout@v2
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
+    - uses: actions/checkout@v4
+    - uses: actions/download-artifact@v4
       with:
-        dotnet-version: 8.x
+        name: nuget-packages
+        path: ./nupkg
 
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build --no-restore --configuration Release --version-suffix "pre${{ github.run_number }}"
-
-    - name: Pack
-      run: dotnet pack --no-build --configuration Release --output out --version-suffix "pre${{ github.run_number }}"
-
-    - name: Push
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 8.x
-        source-url: https://api.nuget.org/v3/index.json
-      env:
-        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-      #run: dotnet nuget push ./out/*.nupkg
+    - name: Publish Nuget Package
+      run: dotnet nuget push ./nupkg/*-prerelase.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
