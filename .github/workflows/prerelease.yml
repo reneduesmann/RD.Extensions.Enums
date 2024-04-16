@@ -16,7 +16,7 @@ jobs:
     - uses: actions/download-artifact@v4
       with:
         name: nuget-packages
-        path: nuget-packages
+        path: nupkg
     - run: zip -r nuget-packages.zip nupkg/
 
     - name: Publish Nuget Package
