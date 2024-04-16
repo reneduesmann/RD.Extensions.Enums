@@ -50,6 +50,21 @@ public interface IEnumCache
     string? GetStringValue(Enum enumInput);
 
     /// <summary>
+    /// Get the enum value that has an attribute value of <paramref name="attributeValue"/>.
+    /// </summary>
+    /// <remarks>
+    /// Enum valeus must be cached.
+    /// </remarks>
+    /// <typeparam name="TEnum">Enum to search. Enum values must be cached.</typeparam>
+    /// <typeparam name="TDataType">Type to search.</typeparam>
+    /// <param name="attributeValue">Value to search.</param>
+    /// <returns>Found enum value. If a value is not found, it will returns the default value,
+    /// what is the first value in the enum.</returns>
+    /// <exception cref="ArgumentException"><typeparamref name="TEnum"/> is not a valid enum type.</exception>
+    TEnum? GetEnumValueByAttributeValue<TEnum, TDataType>(TDataType attributeValue)
+        where TEnum : Enum;
+
+    /// <summary>
     /// Get the derived attribute value from the <paramref name="enumInput"/> that are of type <typeparamref name="TDataType"/>
     /// and are not allowed to have multiple values.
     /// </summary>

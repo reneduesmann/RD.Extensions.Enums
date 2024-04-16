@@ -66,6 +66,74 @@ public class EnumCache : IEnumCache
         => this.GetValue<long>(enumInput);
 
     /// <summary>
+    /// Get the enum value that has an attribute value of <paramref name="attributeValue"/>.
+    /// </summary>
+    /// <remarks>
+    /// Enum valeus must be cached.
+    /// </remarks>
+    /// <typeparam name="TEnum">Enum to search. Enum values must be cached.</typeparam>
+    /// <typeparam name="TDataType">Type to search.</typeparam>
+    /// <param name="attributeValue">Value to search.</param>
+    /// <returns>Found enum value. If a value is not found, it will returns the default value,
+    /// what is the first value in the enum.</returns>
+    /// <exception cref="ArgumentException"><typeparamref name="TEnum"/> is not a valid enum type.</exception>
+    public TEnum? GetEnumValueByAttributeValue<TEnum, TDataType>(TDataType attributeValue)
+        where TEnum : Enum
+    {
+        Type enumType = typeof(TEnum);
+
+        if (!enumType.IsEnum)
+        {
+            throw new ArgumentException("Type is not a valid enum.", nameof(TEnum));
+        }
+
+        if(!this._cache.TryGetValue(enumType, out Dictionary<Enum, List<EnumValue>>? enumDictionary) ||
+            enumDictionary is null)
+        {
+            return default;
+        }
+
+        foreach (KeyValuePair<Enum, List<EnumValue>> enumValues in enumDictionary)
+        {
+            foreach (EnumValue enumValue in enumValues.Value)
+            {
+                if (enumValue.Type != typeof(TDataType))
+                {
+                    continue;
+                }
+
+                if (enumValue.AllowMultiple)
+                {
+                    if(enumValue.Value is not List<object> objectValues)
+                    {
+                        continue;
+                    }
+
+                    foreach (object objectValue in objectValues)
+                    {
+                        if(objectValue.Equals(attributeValue))
+                        {
+                            return (TEnum)enumValues.Key;
+                        }
+                    }
+                }
+
+                if(enumValue.Value is not TDataType typedValue)
+                {
+                    continue;
+                }
+
+                if(EqualityComparer<TDataType>.Default.Equals(typedValue, attributeValue))
+                {
+                    return (TEnum)enumValues.Key;
+                }
+            }
+        }
+
+        return default;
+    }
+
+    /// <summary>
     /// Get the derived attribute value from the <paramref name="enumInput"/> that are of type <typeparamref name="TDataType"/>
     /// and are not allowed to have multiple values.
     /// </summary>

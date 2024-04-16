@@ -31,6 +31,11 @@ public class EnumCacheTests
         StringValue
     }
 
+    enum TestEnum1
+    {
+
+    }
+
     private readonly IEnumCache _enumCache;
 
     public EnumCacheTests()
@@ -514,5 +519,50 @@ public class EnumCacheTests
 
         // Assert
         act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
+    public void GetEnumValueByAttributeValue_ValidAttributeValue_ReturnsEnumValue()
+    {
+        // Arrange
+        string valueToSearch = "Value of the string";
+        TestEnum expectedValue = TestEnum.StringValue;
+        this._enumCache.CacheEnum<TestEnum>();
+
+        // Act
+        TestEnum result = this._enumCache.GetEnumValueByAttributeValue<TestEnum, string>(valueToSearch);
+
+        // Assert
+        result.Should().Be(expectedValue);
+    }
+
+    [Fact]
+    public void GetEnumValueByAttributeValue_AllowedMultipleAttributes_ReturnsEnumValue()
+    {
+        // Arrange
+        KeyValuePair<string, object> valueToSearch = new("secondKey", "secondValue");
+        TestEnum expectedValue = TestEnum.KeyValuePairValues;
+        this._enumCache.CacheEnum<TestEnum>();
+
+        // Act
+        TestEnum result = this._enumCache.GetEnumValueByAttributeValue<TestEnum, KeyValuePair<string, object>>(valueToSearch);
+
+        // Assert
+        result.Should().Be(expectedValue);
+    }
+
+    [Fact]
+    public void GetEnumValueByAttributeValue_InvalidAttributeValue_ReturnsDefault()
+    {
+        // Arrange
+        string valueToSearch = "Invalid value";
+        this._enumCache.CacheEnum<TestEnum1>();
+        TestEnum expectedValue = TestEnum.Undefined;
+
+        // Act
+        TestEnum result = this._enumCache.GetEnumValueByAttributeValue<TestEnum, string>(valueToSearch);
+        
+        // Assert
+        result.Should().Be(expectedValue);
     }
 }
