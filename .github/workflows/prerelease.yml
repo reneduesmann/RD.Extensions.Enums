@@ -3,6 +3,7 @@ name: Nuget Prerelease
 on:
   workflow_run:
       workflows: ["CI"]
+      branches: [main]
       types:
         - completed
 
@@ -16,7 +17,6 @@ jobs:
     - uses: actions/download-artifact@v4
       with:
         name: nuget-packages
-        path: ./nupkg
 
     - name: Publish Nuget Package
       run: dotnet nuget push ./nupkg/*-prerelease.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
