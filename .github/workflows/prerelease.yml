@@ -13,10 +13,10 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
-    - uses: actions/checkout@v4
     - uses: actions/download-artifact@v4
       with:
         name: nuget-packages
+        with: ./nupkg/*-prerelease.nupkg
 
     - name: Publish Nuget Package
       run: dotnet nuget push ./nupkg/*-prerelease.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
