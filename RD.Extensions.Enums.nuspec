@@ -2,7 +2,7 @@
 <package>
 	<metadata>
 		<id>RD.Extensions.Enum</id>
-		<version>1.0.1</version>
+		<version>1.0.2</version>
 		<title>RD.Extensions.Enum</title>
 		<authors>Rene Duesmann</authors>
 		<owners>Rene Duesmann</owners>
@@ -14,7 +14,7 @@
 		<description>
 			Utilities to work with enums in .NET. Decorate enum values with attributes to store additional data.
 		</description>
-		<releaseNotes>Added a method to search enum values by their attribute values.</releaseNotes>
+		<releaseNotes>Added options to define the caching method. Added methods to check if an enum is cached.</releaseNotes>
 		<copyright>Rene Duesmann</copyright>
 		<tags>Extensions Enum Attributes</tags>
 		<dependencies>

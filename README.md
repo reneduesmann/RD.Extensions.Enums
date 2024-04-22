@@ -35,11 +35,13 @@ enumCache.GetEnumValueByAttributeValue<MyEnum, string>("Value1"); // returns MyE
 ### Caching Mechanism
 
 The `EnumCache` class uses a caching mechanism to improve performance when retrieving values
-associated with an Enum. The first time a value is retrieved for a particular Enum, it is store in a cache.
-Subsequent requests for the same value are then served from the cache.
+associated with an Enum. The `EnumCache` class provides provides multiple caching methods that allow you to cache values associated with an Enum value.
+The caching method can be configured in the `EnumCacheOptions` class.
+It exists the following caching methods:
+  - `CacheExplicitly` - caches the values explicitly by calling the `CacheValue` or `CacheEnum` method.
+  - `CacheValueIfUsed` - caches the value when it is retrieved for the first time.
+  - `CacheEntireEnumWhenFirstUsed` - caches the entire enum when the first value is retrieved.
 
-When retrieving a single value from an enum, only the value will be cached. 
-It is also possible to cache the entire enum by calling the `CacheEnum` method.
 
 ### Contributing
 

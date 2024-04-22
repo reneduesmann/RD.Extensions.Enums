@@ -2,6 +2,7 @@
 using RD.Extensions.Enums.Attributes;
 using RD.Extensions.Enums.Cache;
 using RD.Extensions.Enums.Contracts;
+using RD.Extensions.Enums.Enums;
 
 namespace RD.Extensions.Enums.UnitTests.Cache;
 
@@ -40,7 +41,10 @@ public class EnumCacheTests
 
     public EnumCacheTests()
     {
-        this._enumCache = new EnumCache();
+        this._enumCache = new EnumCache(new()
+        {
+            CachingMethod = CachingMethod.CacheValueIfUsed
+        });
     }
 
     [Fact]
@@ -564,5 +568,151 @@ public class EnumCacheTests
         
         // Assert
         result.Should().Be(expectedValue);
+    }
+
+    [Fact]
+    public void IsEnumCached_EnumIsNotCached_ReturnsFalse()
+    {
+        // Arrange
+        TestEnum enumValue = TestEnum.BooleanValue;
+
+        // Act
+        bool isCached = this._enumCache.IsEnumCached(enumValue);
+
+        // Assert
+        isCached.Should().BeFalse();
+    }
+
+    [Fact]
+    public void IsEnumCached_EnumIsCached_ReturnsTrue()
+    {
+        // Arrange
+        TestEnum enumValue = TestEnum.BooleanValue;
+        this._enumCache.CacheEnum<TestEnum>();
+
+        // Act
+        bool isCached = this._enumCache.IsEnumCached(enumValue);
+
+        // Assert
+        isCached.Should().BeTrue();
+    }
+
+    [Fact]
+    public void IsEnumCached_NullValue_ReturnsFalse()
+    {
+        // Arrange
+        TestEnum? enumValue = null;
+
+        // Act
+        bool isCached = this._enumCache.IsEnumCached(enumValue);
+
+        // Assert
+        isCached.Should().BeFalse();
+    }
+
+    [Fact]
+    public void IsEnumCached_EnumTypeIsNotCached_ReturnsFalse()
+    {
+        // Arrange
+        Type enumType = typeof(TestEnum);
+
+        // Act
+        bool isCached = this._enumCache.IsEnumCached(enumType);
+
+        // Assert
+        isCached.Should().BeFalse();
+    }
+
+    [Fact]
+    public void IsEnumCached_EnumTypeIsCached_ReturnsTrue()
+    {
+        // Arrange
+        Type enumType = typeof(TestEnum);
+        this._enumCache.CacheEnum<TestEnum>();
+
+        // Act
+        bool isCached = this._enumCache.IsEnumCached(enumType);
+
+        // Assert
+        isCached.Should().BeTrue();
+    }
+
+    [Fact]
+    public void IsEnumCached_NullType_ReturnsFalse()
+    {
+        // Arrange
+        Type? enumType = null;
+
+        // Act
+        bool isCached = this._enumCache.IsEnumCached(enumType);
+
+        // Assert
+        isCached.Should().BeFalse();
+    }
+
+    [Fact]
+    public void CacheEnum_EnumTypeIsNotCached_CachesEnumType()
+    {
+        // Arrange
+        Type enumType = typeof(TestEnum);
+
+        // Act
+        this._enumCache.CacheEnum(enumType);
+
+        // Assert
+        this._enumCache.IsEnumCached(enumType).Should().BeTrue();
+    }
+
+    [Fact]
+    public void CacheEnum_EnumTypeIsCached_DoesNotCacheEnumType()
+    {
+        // Arrange
+        Type enumType = typeof(TestEnum);
+        this._enumCache.CacheEnum(enumType);
+
+        // Act
+        this._enumCache.CacheEnum(enumType);
+
+        // Assert
+        this._enumCache.IsEnumCached(enumType).Should().BeTrue();
+    }
+
+    [Fact]
+    public void CacheEnum_InvalidType_ThrowsArgumentException()
+    {
+        // Arrange
+        Type enumType = typeof(int);
+
+        // Act
+        Action act = () => this._enumCache.CacheEnum(enumType);
+
+        // Assert
+        act.Should().Throw<ArgumentException>();
+    }
+
+    [Fact]
+    public void CacheEnum_EnumIsNotCached_CachesEnum()
+    {
+        // Arrange
+        Type enumType = typeof(TestEnum);
+
+        // Act
+        this._enumCache.CacheEnum<TestEnum>();
+
+        // Assert
+        this._enumCache.IsEnumCached(enumType).Should().BeTrue();
+    }
+
+    [Fact]
+    public void CacheEnum_EnumIsCached_DoesNotCacheEnum()
+    {
+        // Arrange
+        this._enumCache.CacheEnum<TestEnum>();
+
+        // Act
+        this._enumCache.CacheEnum<TestEnum>();
+
+        // Assert
+        this._enumCache.IsEnumCached(typeof(TestEnum)).Should().BeTrue();
     }
 }
