@@ -90,6 +90,13 @@ public interface IEnumCache
     void CacheEnum<TEnum>() where TEnum : Enum;
 
     /// <summary>
+    /// Cache the derived attribute values from the <paramref name="enumType"/> enum.
+    /// </summary>
+    /// <param name="enumType">Type of the enum.</param>
+    /// <exception cref="ArgumentException"><paramref name="enumType"/> is not a valid enum.</exception>
+    void CacheEnum(Type enumType);
+
+    /// <summary>
     /// Get the cached derived attribute values from the <paramref name="enumValue"/>, is it cached;
     /// Otherwise it will cache the value and return them.
     /// </summary>
@@ -98,4 +105,18 @@ public interface IEnumCache
     /// <exception cref="ArgumentException"><paramref name="enumValue"/> is not a valid enum.</exception>
     /// <exception cref="ArgumentNullException"><paramref name="enumValue"/> is null.</exception>
     List<EnumValue> CacheValue(Enum enumValue);
+
+    /// <summary>
+    /// Check if the enum from the <paramref name="enumValue"/> is cached.
+    /// </summary>
+    /// <param name="enumValue">Value of the enum to check.</param>
+    /// <returns>True when the enum is cached; Otherwise false.</returns>
+    public bool IsEnumCached(Enum enumValue);
+
+    /// <summary>
+    /// Check if the enum type is cached.
+    /// </summary>
+    /// <param name="enumType">Type of the enum.</param>
+    /// <returns>True when the enum is cached; Otherwise false.</returns>
+    public bool IsEnumCached(Type enumType);
 }

@@ -12,9 +12,16 @@ public class EnumCache : IEnumCache
 {
     private readonly ConcurrentDictionary<Type, Dictionary<Enum, List<EnumValue>>> _cache;
 
-    public EnumCache()
+    private readonly EnumCacheOptions _enumCacheOptions;
+
+    /// <summary>
+    /// Create an instance of <see cref="EnumCache"/>.
+    /// </summary>
+    /// <param name="enumCacheOptions">Options to configure the caching.</param>
+    public EnumCache(EnumCacheOptions? enumCacheOptions = null)
     {
         this._cache = new();
+        this._enumCacheOptions = enumCacheOptions ?? new();
     }
 
     /// <summary>
@@ -144,7 +151,7 @@ public class EnumCache : IEnumCache
     {
         ArgumentNullException.ThrowIfNull(enumInput);
 
-        List<EnumValue> enumValues = this.CacheValue(enumInput);
+        List<EnumValue> enumValues = this.GetAndHandleCachingEnum(enumInput);
 
         if (enumValues is null || enumValues.Count == 0)
         {
@@ -170,7 +177,7 @@ public class EnumCache : IEnumCache
     {
         ArgumentNullException.ThrowIfNull(enumInput);
 
-        List<EnumValue> enumValues = this.CacheValue(enumInput);
+        List<EnumValue> enumValues = this.GetAndHandleCachingEnum(enumInput);
 
         if (enumValues is null || enumValues.Count == 0)
         {
@@ -198,12 +205,22 @@ public class EnumCache : IEnumCache
     {
         Type enumType = typeof(TEnum);
 
+        this.CacheEnum(enumType);
+    }
+
+    /// <summary>
+    /// Cache the derived attribute values from the <paramref name="enumType"/> enum.
+    /// </summary>
+    /// <param name="enumType">Type of the enum.</param>
+    /// <exception cref="ArgumentException"><paramref name="enumType"/> is not a valid enum.</exception>
+    public void CacheEnum(Type enumType)
+    {
         if (!enumType.IsEnum)
         {
-            throw new ArgumentException("Type is not a valid enum.", nameof(TEnum));
+            throw new ArgumentException("Type is not a valid enum.", nameof(enumType));
         }
 
-        if (this._cache.TryGetValue(enumType, out Dictionary<Enum, List<EnumValue>>? enumDictionary))
+        if(this.IsEnumCached(enumType))
         {
             return;
         }
@@ -252,10 +269,9 @@ public class EnumCache : IEnumCache
             throw new ArgumentException("Type is not a valid enum.", nameof(enumValue));
         }
 
-        if (this._cache.TryGetValue(enumType, out Dictionary<Enum, List<EnumValue>>? enumDictionary) &&
-            enumDictionary.TryGetValue(enumValue, out List<EnumValue>? enumValues))
+        if(this.IsEnumCached(enumType))
         {
-            return enumValues;
+            return this.GetCachedValues(enumValue);
         }
 
         string? enumValueName = Enum.GetName(enumType, enumValue);
@@ -279,6 +295,36 @@ public class EnumCache : IEnumCache
         this._cache[enumType] = tmpCache;
 
         return this._cache[enumType][enumValue];
+    }
+
+    /// <summary>
+    /// Check if the enum from the <paramref name="enumValue"/> is cached.
+    /// </summary>
+    /// <param name="enumValue">Value of the enum to check.</param>
+    /// <returns>True when the enum is cached; Otherwise false.</returns>
+    public bool IsEnumCached(Enum enumValue)
+    {
+        if(enumValue is null)
+        {
+            return false;
+        }
+
+        return this.IsEnumCached(enumValue.GetType());
+    }
+
+    /// <summary>
+    /// Check if the enum type is cached.
+    /// </summary>
+    /// <param name="enumType">Type of the enum.</param>
+    /// <returns>True when the enum is cached; Otherwise false.</returns>
+    public bool IsEnumCached(Type enumType)
+    {
+        if(enumType is null || !enumType.IsEnum)
+        {
+            return false;
+        }
+
+        return this._cache.ContainsKey(enumType);
     }
 
     private static void SetCacheValue(Enum enumValue, FieldInfo fieldInfo, Dictionary<Enum, List<EnumValue>> tmpCache)
@@ -335,5 +381,39 @@ public class EnumCache : IEnumCache
                 .GetType()
                 .GetProperty(propertyName)!
                 .GetValue(attribute);
+    }
+
+    private List<EnumValue> GetCachedValues(Enum enumValue)
+    {
+        Type enumType = enumValue.GetType();
+
+        if (this._cache.TryGetValue(enumType, out Dictionary<Enum, List<EnumValue>>? enumDictionary) &&
+            enumDictionary.TryGetValue(enumValue, out List<EnumValue>? enumValues))
+        {
+            return enumValues ?? [];
+        }
+
+        return [];
+    }
+
+    private List<EnumValue> GetAndHandleCachingEnum(Enum enumValue)
+    {
+        if(this.IsEnumCached(enumValue))
+        {
+            return this.GetCachedValues(enumValue);
+        }
+
+        switch (this._enumCacheOptions.CachingMethod)
+        {
+            case Enums.CachingMethod.CacheExplicitly:
+                return [];
+            case Enums.CachingMethod.CacheValueIfUsed:
+                return this.CacheValue(enumValue);
+            case Enums.CachingMethod.CacheEntireEnumWhenFirstUsed:
+                this.CacheEnum(enumValue.GetType());
+                return this.GetCachedValues(enumValue);
+            default:
+                return [];
+        }
     }
 }
