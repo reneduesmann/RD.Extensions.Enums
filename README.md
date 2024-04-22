@@ -42,6 +42,9 @@ It exists the following caching methods:
   - `CacheValueIfUsed` - caches the value when it is retrieved for the first time.
   - `CacheEntireEnumWhenFirstUsed` - caches the entire enum when the first value is retrieved.
 
+### Tips
+- When using `GetEnumValueByAttributeValue` and `CachingMethod.CacheValueIfUsed` that won't work, 
+because you are searching the value and can not cache it. Also you must cache the enum first with `.CacheEnum<Enum>();` or using `CachingMethod.CacheEntireEnumWhenFirstUsed`.
 
 ### Contributing
 

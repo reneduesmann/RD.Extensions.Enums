@@ -571,6 +571,38 @@ public class EnumCacheTests
     }
 
     [Fact]
+    public void GetEnumValueByAttributeValue_ValidAttributeValueNotCached_ReturnsDefault()
+    {
+        // Arrange
+        string valueToSearch = "Value of the string";
+        TestEnum expectedValue = TestEnum.Undefined;
+
+        // Act
+        TestEnum result = this._enumCache.GetEnumValueByAttributeValue<TestEnum, string>(valueToSearch);
+
+        // Assert
+        result.Should().Be(expectedValue);
+    }
+
+    [Fact]
+    public void GetEnumValueByAttributeValue_ValidAttributeValueNotCached_CacheEntireEnumWhenFirstUsed_ReturnsEnumValue()
+    {
+        // Arrange
+        string valueToSearch = "Value of the string";
+        TestEnum expectedValue = TestEnum.StringValue;
+        IEnumCache enumCache = new EnumCache(new()
+        {
+            CachingMethod = CachingMethod.CacheEntireEnumWhenFirstUsed
+        });
+
+        // Act
+        TestEnum result = enumCache.GetEnumValueByAttributeValue<TestEnum, string>(valueToSearch);
+
+        // Assert
+        result.Should().Be(expectedValue);
+    }
+
+    [Fact]
     public void IsEnumCached_EnumIsNotCached_ReturnsFalse()
     {
         // Arrange
