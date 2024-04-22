@@ -94,6 +94,20 @@ public class EnumCache : IEnumCache
             throw new ArgumentException("Type is not a valid enum.", nameof(TEnum));
         }
 
+        if(!this.IsEnumCached(enumType))
+        {
+            switch (this._enumCacheOptions.CachingMethod)
+            {
+                case Enums.CachingMethod.CacheExplicitly:
+                default:
+                case Enums.CachingMethod.CacheValueIfUsed:
+                    break;
+                case Enums.CachingMethod.CacheEntireEnumWhenFirstUsed:
+                    this.CacheEnum<TEnum>();
+                    break;
+            }
+        }
+
         if(!this._cache.TryGetValue(enumType, out Dictionary<Enum, List<EnumValue>>? enumDictionary) ||
             enumDictionary is null)
         {
